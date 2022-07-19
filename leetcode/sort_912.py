@@ -1,7 +1,9 @@
 import pytest
+import random
 
 
 class Solution(object):
+
     @staticmethod
     def selection_sort(nums):
         """
@@ -17,21 +19,16 @@ class Solution(object):
                     min_val = nums[j]
                     min_ind = j
 
-            temp = nums[i]
-            nums[i] = nums[min_ind]
-            nums[min_ind] = temp
+            nums[i], nums[min_ind] = nums[min_ind], nums[i]
 
         return nums
 
     @staticmethod
     def bubble_sort(nums):
-
         for i in range(len(nums)):
             for j in range(len(nums) - 1, i, -1):
                 if nums[j - 1] > nums[j]:
-                    temp = nums[j - 1]
-                    nums[j - 1] = nums[j]
-                    nums[j] = temp
+                    nums[j], nums[j - 1] = nums[j - 1], nums[j]
         return nums
 
     @staticmethod
@@ -49,6 +46,10 @@ class Solution(object):
     @staticmethod
     def merge_sort(nums):
         return merge_helper(nums, 0, len(nums) - 1)
+
+    @staticmethod
+    def quick_sort_lumoto(nums):
+        return quick_sort_lumoto_helper(nums, 0, len(nums) - 1)
 
 
 def merge_helper(nums, start, end):
@@ -87,6 +88,32 @@ def merge_helper(nums, start, end):
     return nums
 
 
+def quick_sort_lumoto_helper(nums, start, end):
+    # leaf node:
+    if start >= end:
+        return nums
+
+    # internal node worker
+    random.seed(0)
+    rand = random.randrange(start, end)
+    nums[start], nums[rand] = nums[rand], nums[start]
+
+    # Lumoto's partitioning
+    smaller = start
+
+    for bigger in range(start + 1, end + 1, 1):
+        if nums[bigger] < nums[start]:
+            smaller += 1
+            nums[smaller], nums[bigger] = nums[bigger], nums[smaller]
+
+    nums[start], nums[smaller] = nums[smaller], nums[start]
+
+    quick_sort_lumoto_helper(nums, start, smaller - 1)
+    quick_sort_lumoto_helper(nums, smaller + 1, end)
+
+    return nums
+
+
 @pytest.mark.parametrize(
     "input, expected",
     [
@@ -97,7 +124,7 @@ def merge_helper(nums, start, end):
 class TestSort:
     sol = Solution()
 
-    def test_selection_sort(self,input, expected):
+    def test_selection_sort(self, input, expected):
         actual = self.sol.selection_sort(nums=input)
         assert actual == expected
 
@@ -111,4 +138,8 @@ class TestSort:
 
     def test_merge_sort(self, input, expected):
         actual = self.sol.merge_sort(nums=input)
+        assert actual == expected
+
+    def test_quick_sort(self, input, expected):
+        actual = self.sol.quick_sort_lumoto(nums=input)
         assert actual == expected
