@@ -51,6 +51,10 @@ class Solution(object):
     def quick_sort_lumoto(nums):
         return quick_sort_lumoto_helper(nums, 0, len(nums) - 1)
 
+    @staticmethod
+    def quick_sort_hoare(nums):
+        return quick_sort_hoare_helper(nums, 0, len(nums) - 1)
+
 
 def merge_helper(nums, start, end):
     # leaf node:
@@ -114,11 +118,44 @@ def quick_sort_lumoto_helper(nums, start, end):
     return nums
 
 
+def quick_sort_hoare_helper(nums, start, end):
+    # leaf node:
+    if start >= end:
+        return nums
+
+    # internal node worker
+    random.seed(0)
+    rand = random.randrange(start, end)
+    nums[start], nums[rand] = nums[rand], nums[start]
+
+    # Lumoto's partitioning
+    smaller = start + 1
+    bigger = end
+
+    while smaller <= bigger:
+        if nums[smaller] < nums[start]:
+            smaller += 1
+        elif nums[bigger] > nums[start]:
+            bigger -= 1
+        else:
+            nums[smaller], nums[bigger] = nums[bigger], nums[smaller]
+            smaller += 1
+            bigger -= 1
+
+    nums[start], nums[bigger] = nums[bigger], nums[start]
+
+    quick_sort_lumoto_helper(nums, start, bigger - 1)
+    quick_sort_lumoto_helper(nums, bigger + 1, end)
+
+    return nums
+
+
 @pytest.mark.parametrize(
     "input, expected",
     [
         ([5, 2, 3, 1], [1, 2, 3, 5]),
-        ([0], [0])
+        ([0], [0]),
+        ([-4, 0, 7, 4, 9, -5, -1, 0, -7, -1], [-7, -5, -4, -1, -1, 0, 0, 4, 7, 9]),
     ]
 )
 class TestSort:
@@ -140,6 +177,10 @@ class TestSort:
         actual = self.sol.merge_sort(nums=input)
         assert actual == expected
 
-    def test_quick_sort(self, input, expected):
+    def test_quick_sort_lumoto(self, input, expected):
         actual = self.sol.quick_sort_lumoto(nums=input)
+        assert actual == expected
+
+    def test_quick_sort_hoare(self, input, expected):
+        actual = self.sol.quick_sort_hoare(nums=input)
         assert actual == expected
